@@ -24,39 +24,39 @@ Either cool.io or eventmachine
 
 Remember to wrap a fiber around the client, and inside the client:
 
-* with cool.io:
+### with cool.io:
 
-      Coolio::SyncDefer{
-        sleep(10) # any CPU-bound operations
-      }
-      puts "DONE"
+    Coolio::SyncDefer{
+      sleep(10) # any CPU-bound operations
+    }
+    puts "DONE"
 
-* with eventmachine:
+### with eventmachine:
 
-      EventMachine::SyncDefer{
-        sleep(10) # any CPU-bound operations
-      }
-      puts "DONE"
+    EventMachine::SyncDefer{
+      sleep(10) # any CPU-bound operations
+    }
+    puts "DONE"
 
 Full examples:
 
-* with cool.io:
+### with cool.io:
 
+    Fiber.new{
+      Coolio::SyncDefer.defer{ sleep(10) } # any CPU-bound operations
+      puts "DONE"
+    }.resume
+    Coolio::Loop.default.run
+
+### with eventmachine:
+
+    EM.run{
       Fiber.new{
-        Coolio::SyncDefer.defer{ sleep(10) } # any CPU-bound operations
+        EM::SyncDefer.defer{ sleep(10) } # any CPU-bound operations
         puts "DONE"
+        EM.stop
       }.resume
-      Coolio::Loop.default.run
-
-* with eventmachine:
-
-      EM.run{
-        Fiber.new{
-          EM::SyncDefer.defer{ sleep(10) } # any CPU-bound operations
-          puts "DONE"
-          EM.stop
-        }.resume
-      }
+    }
 
 ## CONTRIBUTORS:
 
