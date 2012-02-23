@@ -1,4 +1,4 @@
-# sync-defer
+# sync-defer [![Build Status](http://travis-ci.org/godfat/sync-defer.png)](http://travis-ci.org/godfat/sync-defer)
 
 by Lin Jen-Shin ([godfat](http://godfat.org))
 
