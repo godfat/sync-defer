@@ -14,7 +14,8 @@ Synchronous deferred operations with fibers (coroutines)
 
 ## REQUIREMENTS:
 
-Either cool.io or eventmachine
+* Either cool.io or eventmachine
+* Ruby 1.9+ (or if fibers could be used in Ruby 1.8)
 
 ## INSTALLATION:
 
