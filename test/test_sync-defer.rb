@@ -1,30 +1,45 @@
 
 require 'fiber'
 require 'bacon'
+require 'rr'
+
+include RR::Adapters::RRMethods
+
+require 'sync-defer'
 
 begin
   require 'cool.io/sync-defer'
-  describe Coolio::SyncDefer do
-    should 'defer_one' do
-      result = []
-      Fiber.new{
-        result << Coolio::SyncDefer.defer{ sleep 0.1; result << 0; 1 }
-        result << Coolio::SyncDefer.defer(lambda{ 2 })
-        result << 3
-      }.resume
-      Coolio::Loop.default.run
-      result.should.eql [0, 1, 2, 3]
-    end
+  [Coolio::SyncDefer, SyncDefer].each do |defer|
+    describe defer do
+      before do
+        stub(Object).const_defined?(:EventMachine){ false }
+      end
 
-    should 'defer_multi' do
-      result = []
+      after do
+        RR.verify
+      end
+
+      should 'defer_one' do
+        result = []
         Fiber.new{
-          result.concat(Coolio::SyncDefer.defer(lambda{ sleep 0.1; 1 },
-                                                lambda{ result << 0; 2 }))
+          result << defer.defer{ sleep 0.1; result << 0; 1 }
+          result << defer.defer(lambda{ 2 })
           result << 3
         }.resume
-      Coolio::Loop.default.run
-      result.should.eql [0, 1, 2, 3]
+        Coolio::Loop.default.run
+        result.should.eql [0, 1, 2, 3]
+      end
+
+      should 'defer_multi' do
+        result = []
+          Fiber.new{
+            result.concat(defer.defer(lambda{ sleep 0.1; 1 },
+                                      lambda{ result << 0; 2 }))
+            result << 3
+          }.resume
+        Coolio::Loop.default.run
+        result.should.eql [0, 1, 2, 3]
+      end
     end
   end
 rescue LoadError => e
@@ -33,31 +48,41 @@ end
 
 begin
   require 'eventmachine/sync-defer'
-  describe EventMachine::SyncDefer do
-    should 'defer_one' do
-      result = []
-      EM.run{
-        Fiber.new{
-          result << EM::SyncDefer.defer{ sleep(0.1); result << 0; 1 }
-          result << EM::SyncDefer.defer(lambda{ 2 })
-          result << 3
-          EM.stop
-        }.resume
-      }
-      result.inspect.should == [0, 1, 2, 3].inspect
-    end
+  [EventMachine::SyncDefer, SyncDefer].each do |defer|
+    describe defer do
+      before do
+        stub(Object).const_defined?(:EventMachine){ true }
+      end
 
-    should 'defer_multi' do
-      result = []
-      EM.run{
-        Fiber.new{
-          result.concat(EM::SyncDefer.defer(lambda{ sleep(0.1); 1 },
-                                            lambda{ result << 0; 2 }))
-          result << 3
-          EM.stop
-        }.resume
-      }
-      result.inspect.should == [0, 1, 2, 3].inspect
+      after do
+        RR.verify
+      end
+
+      should 'defer_one' do
+        result = []
+        EM.run{
+          Fiber.new{
+            result << defer.defer{ sleep(0.1); result << 0; 1 }
+            result << defer.defer(lambda{ 2 })
+            result << 3
+            EM.stop
+          }.resume
+        }
+        result.inspect.should == [0, 1, 2, 3].inspect
+      end
+
+      should 'defer_multi' do
+        result = []
+        EM.run{
+          Fiber.new{
+            result.concat(defer.defer(lambda{ sleep(0.1); 1 },
+                                      lambda{ result << 0; 2 }))
+            result << 3
+            EM.stop
+          }.resume
+        }
+        result.inspect.should == [0, 1, 2, 3].inspect
+      end
     end
   end
 rescue LoadError => e
