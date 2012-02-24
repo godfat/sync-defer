@@ -13,6 +13,7 @@ begin
     describe defer do
       before do
         stub(Object).const_defined?(:EventMachine){ false }
+        stub(Object).const_defined?(:Coolio)      { true  }
       end
 
       after do
