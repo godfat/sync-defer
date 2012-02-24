@@ -24,26 +24,31 @@ Either cool.io or eventmachine
 
 Remember to wrap a fiber around the client, and inside the client:
 
-### with cool.io:
+### Generic interface which would select underneath reactor automatically:
 
-    Coolio::SyncDefer{
-      sleep(10) # any CPU-bound operations
-    }
+    # Single computation:
+    puts(SyncDefer.defer{
+                           sleep(10) # any CPU-bound operations
+                           100})     # 100
     puts "DONE"
 
-### with eventmachine:
-
-    EventMachine::SyncDefer{
-      sleep(10) # any CPU-bound operations
-    }
+    # Multiple computations:
+    puts(SyncDefer.defer(lambda{
+                           sleep(10) # any CPU-bound operations
+                           100
+                         },
+                         lambda{
+                           sleep(5)  # any CPU-bound operations
+                           50}))     # [100, 50] # it would match the index
     puts "DONE"
 
-Full examples:
+Full examples with reactor turned on:
 
 ### with cool.io:
 
     Fiber.new{
-      Coolio::SyncDefer.defer{ sleep(10) } # any CPU-bound operations
+      # or Coolio::SyncDefer
+      SyncDefer.defer{ sleep(10) }
       puts "DONE"
     }.resume
     Coolio::Loop.default.run
@@ -52,7 +57,8 @@ Full examples:
 
     EM.run{
       Fiber.new{
-        EM::SyncDefer.defer{ sleep(10) } # any CPU-bound operations
+        # or EM::SyncDefer
+        SyncDefer.defer{ sleep(10) }
         puts "DONE"
         EM.stop
       }.resume
