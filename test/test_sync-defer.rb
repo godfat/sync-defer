@@ -7,6 +7,9 @@ include RR::Adapters::RRMethods
 
 require 'sync-defer'
 
+class TestException < Exception
+end
+
 begin
   require 'cool.io/sync-defer'
   [Coolio::SyncDefer, SyncDefer].each do |defer|
@@ -83,6 +86,17 @@ begin
           }.resume
         }
         result.inspect.should == [0, 1, 2, 3].inspect
+      end
+
+      should 'raise the exception' do
+        EM.run{
+          Fiber.new{
+            lambda{
+              defer.defer{ raise TestException }
+            }.should.raise(TestException)
+            EM.stop
+          }.resume
+        }
       end
     end
   end
