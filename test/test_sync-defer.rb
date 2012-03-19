@@ -17,7 +17,7 @@ begin
       before do
         watcher = Coolio::AsyncWatcher.new.attach(Coolio::Loop.default)
         watcher.on_signal{detach}
-        watcher.signal
+        Thread.new{sleep(0.1); watcher.signal}
       end
 
       after do
