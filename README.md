@@ -25,71 +25,71 @@ Synchronous deferred operations with fibers (coroutines)
 
 Remember to wrap a fiber around the client, and inside the client:
 
-### Generic interface which would select underneath reactor automatically:
+* Generic interface which would select underneath reactor automatically:
 
-``` ruby
-    # Single computation:
-    puts(SyncDefer.defer{
-                           sleep(10) # any CPU-bound operations
-                           100})     # 100
-    puts "DONE"
-
-    # Multiple computations:
-    puts(SyncDefer.defer(lambda{
-                           sleep(10) # any CPU-bound operations
-                           100
-                         },
-                         lambda{
-                           sleep(5)  # any CPU-bound operations
-                           50}))     # [100, 50] # it would match the index
-    puts "DONE"
-```
-
-Full examples with reactor turned on:
-
-### with cool.io:
-
-``` ruby
-    # only for adding at least one watcher in the loop
-    watcher = Coolio::AsyncWatcher.new.attach(Coolio::Loop.default)
-    watcher.on_signal{detach}
-    watcher.signal
-
-    Fiber.new{
-      # or Coolio::SyncDefer
-      SyncDefer.defer{ sleep(10) }
+  ``` ruby
+      # Single computation:
+      puts(SyncDefer.defer{
+                             sleep(10) # any CPU-bound operations
+                             100})     # 100
       puts "DONE"
-    }.resume
-    Coolio::Loop.default.run
-```
 
-### with eventmachine:
+      # Multiple computations:
+      puts(SyncDefer.defer(lambda{
+                             sleep(10) # any CPU-bound operations
+                             100
+                           },
+                           lambda{
+                             sleep(5)  # any CPU-bound operations
+                             50}))     # [100, 50] # it would match the index
+      puts "DONE"
+  ```
 
-``` ruby
-    EM.run{
+  Full examples with reactor turned on:
+
+* with cool.io:
+
+  ``` ruby
+      # only for adding at least one watcher in the loop
+      watcher = Coolio::AsyncWatcher.new.attach(Coolio::Loop.default)
+      watcher.on_signal{detach}
+      watcher.signal
+
       Fiber.new{
-        # or EM::SyncDefer
+        # or Coolio::SyncDefer
         SyncDefer.defer{ sleep(10) }
         puts "DONE"
-        EM.stop
       }.resume
-    }
-```
+      Coolio::Loop.default.run
+  ```
 
-### No problems with exceptions, use them as normal:
+* with eventmachine:
 
-``` ruby
-    EM.run{
-      Fiber.new{
-        begin
-          SyncDefer.defer{ raise "BOOM" }
-        rescue => e
-          p e
-        end
-        EM.stop
-      }.resume
-    }
-```
+  ``` ruby
+      EM.run{
+        Fiber.new{
+          # or EM::SyncDefer
+          SyncDefer.defer{ sleep(10) }
+          puts "DONE"
+          EM.stop
+        }.resume
+      }
+  ```
+
+* No problems with exceptions, use them as normal:
+
+  ``` ruby
+      EM.run{
+        Fiber.new{
+          begin
+            SyncDefer.defer{ raise "BOOM" }
+          rescue => e
+            p e
+          end
+          EM.stop
+        }.resume
+      }
+  ```
 
 ## CONTRIBUTORS:
 
