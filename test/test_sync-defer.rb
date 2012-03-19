@@ -98,6 +98,22 @@ begin
           }.resume
         }
       end
+
+      should 'one of them raise' do
+        EM.run{
+          Fiber.new{
+            lambda{
+              defer.defer(lambda{ raise TestException }, lambda{})
+            }.should.raise(TestException)
+
+            lambda{
+              defer.defer(lambda{}, lambda{ raise TestException })
+            }.should.raise(TestException)
+
+            EM.stop
+          }.resume
+        }
+      end
     end
   end
 rescue LoadError => e
