@@ -15,8 +15,9 @@ begin
   [Coolio::SyncDefer, SyncDefer].each do |defer|
     describe defer do
       before do
-        stub(Object).const_defined?(:EventMachine){ false }
-        stub(Object).const_defined?(:Coolio)      { true  }
+        watcher = Coolio::AsyncWatcher.new.attach(Coolio::Loop.default)
+        watcher.on_signal{detach}
+        watcher.signal
       end
 
       after do
@@ -76,10 +77,6 @@ begin
   require 'eventmachine/sync-defer'
   [EventMachine::SyncDefer, SyncDefer].each do |defer|
     describe defer do
-      before do
-        stub(Object).const_defined?(:EventMachine){ true }
-      end
-
       after do
         RR.verify
       end

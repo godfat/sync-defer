@@ -51,7 +51,9 @@ Full examples with reactor turned on:
 
 ``` ruby
     # only for adding at least one watcher in the loop
-    Coolio::TimerWatcher.new(1).attach(Coolio::Loop.default).on_timer{detach}
+    watcher = Coolio::AsyncWatcher.new.attach(Coolio::Loop.default)
+    watcher.on_signal{detach}
+    watcher.signal
 
     Fiber.new{
       # or Coolio::SyncDefer
