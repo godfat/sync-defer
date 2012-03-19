@@ -12,9 +12,10 @@ end
 module SyncDefer
   module_function
   def defer *args, &block
-    if Object.const_defined?(:EventMachine)
+    if Object.const_defined?(:EventMachine) && EventMachine.reactor_running?
       EventMachine::SyncDefer.defer(*args, &block)
-    elsif Object.const_defined?(:Coolio)
+    elsif Object.const_defined?(:Coolio) &&
+          Coolio::Loop.default.has_active_watchers?
       Coolio::SyncDefer.defer(*args, &block)
     else
       raise "No reactor found. Only cool.io and eventmachine are supported."
