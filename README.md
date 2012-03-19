@@ -30,18 +30,18 @@ Remember to wrap a fiber around the client, and inside the client:
   ``` ruby
       # Single computation:
       puts(SyncDefer.defer{
-                             sleep(10) # any CPU-bound operations
-                             100})     # 100
+                             sleep(5) # any CPU-bound operations
+                             100})    # 100
       puts "DONE"
 
       # Multiple computations:
       puts(SyncDefer.defer(lambda{
-                             sleep(10) # any CPU-bound operations
+                             sleep(5) # any CPU-bound operations
                              100
                            },
                            lambda{
-                             sleep(5)  # any CPU-bound operations
-                             50}))     # [100, 50] # it would match the index
+                             sleep(2) # any CPU-bound operations
+                             50}))    # [100, 50] # it would match the index
       puts "DONE"
   ```
 
@@ -51,13 +51,12 @@ Remember to wrap a fiber around the client, and inside the client:
 
   ``` ruby
       # only for adding at least one watcher in the loop
-      watcher = Coolio::AsyncWatcher.new.attach(Coolio::Loop.default)
-      watcher.on_signal{detach}
-      watcher.signal
+      Coolio::TimerWatcher.new(1).
+        attach(Coolio::Loop.default).on_timer{detach}
 
       Fiber.new{
         # or Coolio::SyncDefer
-        SyncDefer.defer{ sleep(10) }
+        SyncDefer.defer{ sleep(5) }
         puts "DONE"
       }.resume
       Coolio::Loop.default.run
@@ -69,7 +68,7 @@ Remember to wrap a fiber around the client, and inside the client:
       EM.run{
         Fiber.new{
           # or EM::SyncDefer
-          SyncDefer.defer{ sleep(10) }
+          SyncDefer.defer{ sleep(5) }
           puts "DONE"
           EM.stop
         }.resume
