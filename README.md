@@ -27,6 +27,7 @@ Remember to wrap a fiber around the client, and inside the client:
 
 ### Generic interface which would select underneath reactor automatically:
 
+``` ruby
     # Single computation:
     puts(SyncDefer.defer{
                            sleep(10) # any CPU-bound operations
@@ -42,10 +43,15 @@ Remember to wrap a fiber around the client, and inside the client:
                            sleep(5)  # any CPU-bound operations
                            50}))     # [100, 50] # it would match the index
     puts "DONE"
+```
 
 Full examples with reactor turned on:
 
 ### with cool.io:
+
+``` ruby
+    # only for adding at least one watcher in the loop
+    Coolio::TimerWatcher.new(1).attach(Coolio::Loop.default).on_timer{detach}
 
     Fiber.new{
       # or Coolio::SyncDefer
@@ -53,9 +59,11 @@ Full examples with reactor turned on:
       puts "DONE"
     }.resume
     Coolio::Loop.default.run
+```
 
 ### with eventmachine:
 
+``` ruby
     EM.run{
       Fiber.new{
         # or EM::SyncDefer
@@ -64,6 +72,22 @@ Full examples with reactor turned on:
         EM.stop
       }.resume
     }
+```
+
+### No problems with exceptions, use them as normal:
+
+``` ruby
+    EM.run{
+      Fiber.new{
+        begin
+          SyncDefer.defer{ raise "BOOM" }
+        rescue => e
+          p e
+        end
+        EM.stop
+      }.resume
+    }
+```
 
 ## CONTRIBUTORS:
 

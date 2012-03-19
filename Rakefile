@@ -8,7 +8,7 @@ desc 'Generate gemspec'
 task 'gem:spec' do
   Gemgem.spec = Gemgem.create do |s|
     s.name    = 'sync-defer'
-    s.version = '0.9.1'
+    s.version = '0.9.2'
 
     %w[].each{ |g| s.add_runtime_dependency(g) }
   end

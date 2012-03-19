@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = "sync-defer"
-  s.version = "0.9.1"
+  s.version = "0.9.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Lin Jen-Shin (godfat)"]
-  s.date = "2012-02-25"
+  s.date = "2012-03-20"
   s.description = "Synchronous deferred operations with fibers (coroutines)"
   s.email = ["godfat (XD) godfat.org"]
   s.files = [
@@ -27,7 +27,7 @@ Gem::Specification.new do |s|
   "test/test_sync-defer.rb"]
   s.homepage = "https://github.com/godfat/sync-defer"
   s.require_paths = ["lib"]
-  s.rubygems_version = "1.8.17"
+  s.rubygems_version = "1.8.19"
   s.summary = "Synchronous deferred operations with fibers (coroutines)"
   s.test_files = ["test/test_sync-defer.rb"]
 

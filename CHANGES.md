@@ -1,5 +1,12 @@
 # CHANGES
 
+## sync-defer 0.9.2 -- 2012-03-20
+
+* Properly select the reactor.
+
+* Make it exception aware. If there's an exception raised in the
+  computation, sync-defer would resume back and raise that exception.
+
 ## sync-defer 0.9.1 -- 2012-02-25
 
 * Added a generic interface which would pick the underneath reactor
