@@ -12,43 +12,46 @@ module EventMachine::SyncDefer
     else
       defer_multi(fiber, funcs)
     end
-    result = Fiber.yield
-    if result.kind_of?(Exception)
-      raise result
+    result, exception = Fiber.yield
+    if exception
+      raise exception
     else
       result
     end
   end
 
   def defer_one fiber, func
-    EventMachine.defer(lambda_with_rescue(func),
-                       lambda{ |result| fiber.resume(result)})
+    exception = nil
+    EventMachine.defer(lambda{
+                         begin
+                           func.call
+                         rescue Exception => e
+                           exception = e
+                         end
+                       },
+                       lambda{ |result| fiber.resume(result, exception)})
   end
 
   def defer_multi fiber, funcs
-    results = {}
+    results, exception = {}, nil
     funcs.each.with_index do |func, index|
       EventMachine.defer(
-        lambda_with_rescue(func),
+        lambda{
+          begin
+            func.call
+          rescue Exception => e
+            exception = e
+          end
+        },
         lambda{ |result|
-          if result.kind_of?(Exception)
-            fiber.resume(result)
+          if exception
+            fiber.resume(nil, exception)
           else
             results[index] = result
-            fiber.resume(results.sort.map(&:last)) if
+            fiber.resume(results.sort.map(&:last), nil) if
               results.size == funcs.size
           end
         })
     end
-  end
-
-  def lambda_with_rescue func
-    lambda{
-      begin
-        func.call
-      rescue Exception => e
-        e
-      end
-    }
   end
 end
