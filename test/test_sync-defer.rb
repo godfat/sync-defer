@@ -44,6 +44,28 @@ begin
         Coolio::Loop.default.run
         result.should.eql [0, 1, 2, 3]
       end
+
+      should 'raise the exception' do
+        Fiber.new{
+          lambda{
+            defer.defer{ raise TestException }
+          }.should.raise(TestException)
+        }.resume
+        Coolio::Loop.default.run
+      end
+
+      should 'one of them raise' do
+        Fiber.new{
+          lambda{
+            defer.defer(lambda{ raise TestException }, lambda{})
+          }.should.raise(TestException)
+
+          lambda{
+            defer.defer(lambda{}, lambda{ raise TestException })
+          }.should.raise(TestException)
+        }.resume
+        Coolio::Loop.default.run
+      end
     end
   end
 rescue LoadError => e

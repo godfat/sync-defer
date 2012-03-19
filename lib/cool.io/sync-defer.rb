@@ -22,15 +22,20 @@ module Coolio::SyncDefer
       self.fiber = Fiber.current
       attach(loop)
       yield
-      Fiber.yield
+      result, exception = Fiber.yield
+      if exception
+        raise exception
+      else
+        result
+      end
     end
 
     protected
-    attr_accessor :fiber
+    attr_accessor :fiber, :exception
     attr_writer   :result
     def on_signal
       detach
-      fiber.resume(result)
+      fiber.resume(result, exception)
     end
   end
 
@@ -42,7 +47,11 @@ module Coolio::SyncDefer
     protected
     def defer func
       Thread.new{
-        self.result = func.call
+        begin
+          self.result = func.call
+        rescue Exception => e
+          self.exception = e
+        end
         signal
       }
     end
@@ -60,13 +69,18 @@ module Coolio::SyncDefer
       self.target = funcs.size
       funcs.each.with_index do |func, index|
         Thread.new{
-          values[index] = func.call
+          begin
+            values[index] = func.call
+          rescue Exception => e
+            self.exception = e
+          end
           signal
         }
       end
     end
 
     def on_signal
+      return super if exception
       return if values.size != target
       self.result = values.sort.map(&:last)
       super
