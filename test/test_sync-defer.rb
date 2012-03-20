@@ -15,9 +15,8 @@ begin
   [Coolio::SyncDefer, SyncDefer].each do |defer|
     describe defer do
       before do
-        watcher = Coolio::AsyncWatcher.new.attach(Coolio::Loop.default)
-        watcher.on_signal{detach}
-        Thread.new{sleep(0.1); watcher.signal}
+        @watcher = Coolio::AsyncWatcher.new.attach(Coolio::Loop.default)
+        @watcher.on_signal{detach}
       end
 
       after do
@@ -30,6 +29,7 @@ begin
           result << defer.defer{ sleep 0.1; result << 0; 1 }
           result << defer.defer(lambda{ 2 })
           result << 3
+          @watcher.signal
         }.resume
         Coolio::Loop.default.run
         result.should.eql [0, 1, 2, 3]
@@ -41,6 +41,7 @@ begin
             result.concat(defer.defer(lambda{ sleep 0.1; 1 },
                                       lambda{ result << 0; 2 }))
             result << 3
+            @watcher.signal
           }.resume
         Coolio::Loop.default.run
         result.should.eql [0, 1, 2, 3]
@@ -51,6 +52,7 @@ begin
           lambda{
             defer.defer{ raise TestException }
           }.should.raise(TestException)
+          @watcher.signal
         }.resume
         Coolio::Loop.default.run
       end
@@ -64,6 +66,7 @@ begin
           lambda{
             defer.defer(lambda{}, lambda{ raise TestException })
           }.should.raise(TestException)
+          @watcher.signal
         }.resume
         Coolio::Loop.default.run
       end
