@@ -94,7 +94,7 @@ begin
             EM.stop
           }.resume
         }
-        result.inspect.should == [0, 1, 2, 3].inspect
+        result.inspect.should.eql [0, 1, 2, 3].inspect
       end
 
       should 'defer_multi' do
@@ -107,7 +107,7 @@ begin
             EM.stop
           }.resume
         }
-        result.inspect.should == [0, 1, 2, 3].inspect
+        result.inspect.should.eql [0, 1, 2, 3].inspect
       end
 
       should 'raise the exception' do
@@ -154,6 +154,7 @@ describe SyncDefer do
 
   should 'multiple computations' do
     mock($stderr).puts(is_a(String)).times(2)
-    SyncDefer.defer(lambda{1}, lambda{2}){ 3 }.should.eql [1, 2, 3]
+    SyncDefer.defer(lambda{1}, lambda{2}){ 3 }.
+      inspect.should.eql [1, 2, 3].inspect
   end
 end
