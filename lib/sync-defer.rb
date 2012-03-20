@@ -22,7 +22,11 @@ module SyncDefer
                    "Only cool.io and eventmachine are supported.")
       $stderr.puts("           Called from: #{caller.last(5).inspect}")
       args << block if block_given?
-      args.map(&:call)
+      if args.size == 1
+        args.first.call
+      else
+        args.map(&:call)
+      end
     end
   end
 end
