@@ -141,3 +141,19 @@ begin
 rescue LoadError => e
   puts "eventmachine is not installed, skipping: #{e}"
 end
+
+describe SyncDefer do
+  after do
+    RR.verify
+  end
+
+  should 'also work without a reactor, but print a warning' do
+    mock($stderr).puts(is_a(String)).times(2)
+    SyncDefer.defer{ 123 }.should.eql 123
+  end
+
+  should 'multiple computations' do
+    mock($stderr).puts(is_a(String)).times(2)
+    SyncDefer.defer(lambda{1}, lambda{2}){ 3 }.should.eql [1, 2, 3]
+  end
+end
