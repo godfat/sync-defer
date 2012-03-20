@@ -45,11 +45,11 @@ module EventMachine::SyncDefer
         },
         lambda{ |result|
           if exception
-            fiber.resume(nil, exception)
+            fiber.resume(nil, exception) if fiber.alive?
           else
             results[index] = result
             fiber.resume(results.sort.map(&:last), nil) if
-              results.size == funcs.size
+              results.size == funcs.size && fiber.alive?
           end
         })
     end
