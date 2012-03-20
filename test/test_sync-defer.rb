@@ -143,18 +143,27 @@ rescue LoadError => e
 end
 
 describe SyncDefer do
-  after do
-    RR.verify
-  end
+  before do mock($stderr).puts(is_a(String)).times(3) end
+  after  do RR.verify                                 end
 
   should 'also work without a reactor, but print a warning' do
-    mock($stderr).puts(is_a(String)).times(2)
     SyncDefer.defer{ 123 }.should.eql 123
   end
 
   should 'multiple computations' do
-    mock($stderr).puts(is_a(String)).times(2)
     SyncDefer.defer(lambda{1}, lambda{2}){ 3 }.
       inspect.should.eql [1, 2, 3].inspect
   end
+
+  should 'also fallback if there is no fibers in EM' do
+    EM.run{ SyncDefer.defer{ 1 }.should.eql 1; EM.stop }
+  end if Object.const_defined?(:EventMachine)
+
+  should 'also fallback if there is no fibers in Coolio' do
+    watcher = Coolio::AsyncWatcher.new.attach(Coolio::Loop.default)
+    watcher.on_signal{detach}
+    SyncDefer.defer{ 1 }.should.eql 1
+    watcher.signal
+    Coolio::Loop.default.run
+  end if Object.const_defined?(:Coolio)
 end
