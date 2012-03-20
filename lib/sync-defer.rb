@@ -18,7 +18,11 @@ module SyncDefer
           Coolio::Loop.default.has_active_watchers?
       Coolio::SyncDefer.defer(*args, &block)
     else
-      raise "No reactor found. Only cool.io and eventmachine are supported."
+      $stderr.puts("SyncDefer: WARN: No reactor found. " \
+                   "Only cool.io and eventmachine are supported.")
+      $stderr.puts("           Called from: #{caller.last(5).inspect}")
+      args << block if block_given?
+      args.map(&:call)
     end
   end
 end
