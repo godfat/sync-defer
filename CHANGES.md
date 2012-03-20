@@ -1,5 +1,10 @@
 # CHANGES
 
+## sync-defer 0.9.3 -- 2012-03-20
+
+* Also work without a reactor in the generic interface: `SyncDefer.defer`,
+  but print a warning about it.
+
 ## sync-defer 0.9.2 -- 2012-03-20
 
 * Properly select the reactor.
