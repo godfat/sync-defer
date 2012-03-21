@@ -14,7 +14,7 @@ Synchronous deferred operations with fibers (coroutines)
 
 ## REQUIREMENTS:
 
-* Either cool.io or eventmachine
+* Either eventmachine or cool.io
 * Ruby 1.9+ (or if fibers could be used in Ruby 1.8)
 
 ## INSTALLATION:
@@ -47,6 +47,19 @@ Remember to wrap a fiber around the client, and inside the client:
 
   Full examples with reactor turned on:
 
+* with eventmachine:
+
+  ``` ruby
+      EM.run{
+        Fiber.new{
+          # or EM::SyncDefer
+          SyncDefer.defer{ sleep(5) }
+          puts "DONE"
+          EM.stop
+        }.resume
+      }
+  ```
+
 * with cool.io:
 
   ``` ruby
@@ -60,19 +73,6 @@ Remember to wrap a fiber around the client, and inside the client:
         puts "DONE"
       }.resume
       Coolio::Loop.default.run
-  ```
-
-* with eventmachine:
-
-  ``` ruby
-      EM.run{
-        Fiber.new{
-          # or EM::SyncDefer
-          SyncDefer.defer{ sleep(5) }
-          puts "DONE"
-          EM.stop
-        }.resume
-      }
   ```
 
 * No problems with exceptions, use them as normal:
