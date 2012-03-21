@@ -1,5 +1,9 @@
 # CHANGES
 
+## sync-defer 0.9.6 -- ?
+
+* Fixed call stacks information in the warning.
+
 ## sync-defer 0.9.5 -- 2012-03-21
 
 * Also fall back whenever it's not wrapped inside a fiber.

@@ -40,7 +40,7 @@ module SyncDefer
   def fallback message, *args, &block
     $stderr.puts("SyncDefer: WARN: #{message}")
     $stderr.puts("           Falling back to run the computation directly.")
-    $stderr.puts("           Called from: #{caller.last(5).inspect}")
+    $stderr.puts("           Called from: #{caller.first(5).inspect}")
     args << block if block_given?
     if args.size == 1
       args.first.call
