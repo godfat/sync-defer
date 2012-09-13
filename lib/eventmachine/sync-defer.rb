@@ -7,7 +7,9 @@ module EventMachine::SyncDefer
   def defer *funcs, &block
     fiber = Fiber.current
     funcs << block if block_given?
-    if funcs.size == 1
+    if    funcs.empty?
+      return
+    elsif funcs.size == 1
       defer_one(fiber, funcs.first)
     else
       defer_multi(fiber, funcs)

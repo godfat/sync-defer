@@ -143,27 +143,43 @@ rescue LoadError => e
 end
 
 describe SyncDefer do
-  before do mock($stderr).puts(is_a(String)).times(3) end
-  after  do RR.verify                                 end
+  describe 'fallback' do
+    before do mock($stderr).puts(is_a(String)).times(3) end
+    after  do RR.verify                                 end
 
-  should 'also work without a reactor, but print a warning' do
-    SyncDefer.defer{ 123 }.should.eql 123
+    should 'also work without a reactor, but print a warning' do
+      SyncDefer.defer{ 123 }.should.eql 123
+    end
+
+    should 'multiple computations' do
+      SyncDefer.defer(lambda{1}, lambda{2}){ 3 }.
+        inspect.should.eql [1, 2, 3].inspect
+    end
+
+    should 'also fallback if there is no fibers in EM' do
+      EM.run{ SyncDefer.defer{ 1 }.should.eql 1; EM.stop }
+    end if Object.const_defined?(:EventMachine)
+
+    should 'also fallback if there is no fibers in Coolio' do
+      watcher = Coolio::AsyncWatcher.new.attach(Coolio::Loop.default)
+      watcher.on_signal{detach}
+      SyncDefer.defer{ 1 }.should.eql 1
+      watcher.signal
+      Coolio::Loop.default.run
+    end if Object.const_defined?(:Coolio)
   end
 
-  should 'multiple computations' do
-    SyncDefer.defer(lambda{1}, lambda{2}){ 3 }.
-      inspect.should.eql [1, 2, 3].inspect
+  describe 'no yield' do
+    should 'not yield if there is nothing to do in EM' do
+      EM.run{Fiber.new{ SyncDefer.defer.should.eql nil; EM.stop }.resume}
+    end if Object.const_defined?(:EventMachine)
+
+    should 'not yield if there is nothing to do in Coolio' do
+      watcher = Coolio::AsyncWatcher.new.attach(Coolio::Loop.default)
+      watcher.on_signal{detach}
+      Fiber.new{SyncDefer.defer.should.eql nil}.resume
+      watcher.signal
+      Coolio::Loop.default.run
+    end if Object.const_defined?(:Coolio)
   end
-
-  should 'also fallback if there is no fibers in EM' do
-    EM.run{ SyncDefer.defer{ 1 }.should.eql 1; EM.stop }
-  end if Object.const_defined?(:EventMachine)
-
-  should 'also fallback if there is no fibers in Coolio' do
-    watcher = Coolio::AsyncWatcher.new.attach(Coolio::Loop.default)
-    watcher.on_signal{detach}
-    SyncDefer.defer{ 1 }.should.eql 1
-    watcher.signal
-    Coolio::Loop.default.run
-  end if Object.const_defined?(:Coolio)
 end

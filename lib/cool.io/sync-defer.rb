@@ -8,7 +8,9 @@ module Coolio::SyncDefer
     loop  = args.find  { |a| a.kind_of?(Coolio::Loop) }||Coolio::Loop.default
     funcs = args.reject{ |a| a.kind_of?(Coolio::Loop) }
     funcs << block if block_given?
-    if funcs.size == 1
+    if    funcs.empty?
+      return
+    elsif funcs.size == 1
       DeferOne.new(funcs.first, loop).result
     else
       DeferMulti.new(funcs, loop).result
