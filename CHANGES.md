@@ -1,5 +1,9 @@
 # CHANGES
 
+## sync-defer 0.9.7 -- 2012-09-14
+
+* Do nothing if there's no tasks at all.
+
 ## sync-defer 0.9.6 -- 2012-09-13
 
 * Fixed call stacks information in the warning.
