@@ -17,24 +17,27 @@ module SyncDefer
 
   module_function
   def defer *args, &block
-    if root_fiber?
-      fallback("Not called inside a fiber.", *args, &block)
+    if fiber_wrapped?
+      if Object.const_defined?(:EventMachine) &&
+         EventMachine.reactor_running?
+        EventMachine::SyncDefer.defer(*args, &block)
 
-    elsif Object.const_defined?(:EventMachine) &&
-          EventMachine.reactor_running?
-      EventMachine::SyncDefer.defer(*args, &block)
+      elsif Object.const_defined?(:Coolio) &&
+            Coolio::Loop.default.has_active_watchers?
+        Coolio::SyncDefer.defer(*args, &block)
 
-    elsif Object.const_defined?(:Coolio) &&
-          Coolio::Loop.default.has_active_watchers?
-      Coolio::SyncDefer.defer(*args, &block)
+      else
+        fallback("No reactor found.", *args, block)
+      end
 
     else
-      fallback("No reactor found.", *args, block)
+      fallback("Not called inside a fiber.", *args, &block)
     end
   end
 
-  def root_fiber?
-    RootFiber == Fiber.current
+  def fiber_wrapped?
+    # because under a thread, Fiber.current won't return the root fiber
+    RootFiber != Fiber.current && Thread.main == Thread.current
   end
 
   def fallback message, *args, &block
