@@ -1,8 +1,9 @@
 # CHANGES
 
-## sync-defer 0.9.6 -- ?
+## sync-defer 0.9.6 -- 2012-09-13
 
 * Fixed call stacks information in the warning.
+* Properly detect if we're inside a fiber.
 
 ## sync-defer 0.9.5 -- 2012-03-21
 
